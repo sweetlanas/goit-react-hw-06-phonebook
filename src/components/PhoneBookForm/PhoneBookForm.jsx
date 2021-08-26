@@ -1,16 +1,28 @@
 import { connect, useDispatch } from "react-redux";
 import s from "./PhoneBookForm.module.css";
 import actions from "../../redux/actions";
-// import reducer from "../../redux/reducer";
+import { useState } from "react";
 
-const PhoneBookForm = ({
-  onSetUserInfo,
-  contacts,
-  /* onAddContact,*/
-  name,
-  number,
-}) => {
+function PhoneBookForm({ contacts }) {
   const dispatch = useDispatch();
+
+  const [name, setName] = useState("");
+  const [number, setNumber] = useState("");
+
+  const handleSetUserInfo = (e) => {
+    switch (e.target.name) {
+      case "name":
+        setName(e.target.value);
+        break;
+
+      case "number":
+        setNumber(e.target.value);
+        break;
+
+      default:
+        return;
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -19,6 +31,8 @@ const PhoneBookForm = ({
       return;
     }
     dispatch(actions.addContact({ name, number }));
+    setName("");
+    setNumber("");
   };
 
   return (
@@ -27,7 +41,7 @@ const PhoneBookForm = ({
         <p>Name</p>
         <input
           className={s.input}
-          onInput={onSetUserInfo}
+          onInput={handleSetUserInfo}
           type="text"
           name="name"
           value={name}
@@ -40,7 +54,7 @@ const PhoneBookForm = ({
         <p>Number</p>
         <input
           className={s.input}
-          onInput={onSetUserInfo}
+          onInput={handleSetUserInfo}
           type="tel"
           name="number"
           value={number}
@@ -52,12 +66,13 @@ const PhoneBookForm = ({
       <button className={s.addBtn}>Add contact</button>
     </form>
   );
+}
+
+const mapStateToProps = (state) => {
+  return {
+    contacts: state.items,
+  };
 };
-
-const mapStateToProps = (state, props) => ({
-  contacts: state.items,
-});
-
 const mapDispatchToProps = (dispatch) => ({
   onSubmit: ({ name, number }) =>
     dispatch(actions.addContact({ name, number })),

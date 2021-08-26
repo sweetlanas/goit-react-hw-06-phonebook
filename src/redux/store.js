@@ -1,9 +1,39 @@
-import { createStore /*applyMiddleware*/ } from "redux";
-import { composeWithDevTools } from "redux-devtools-extension";
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
 import reducer from "./reducer";
 
-// const reducer = (state = {}, action) => state;
+const persistConfig = {
+  key: "contacts",
+  storage,
+  blacklist: ["filter"],
+};
+const persistedReducer = persistReducer(persistConfig, reducer);
 
-const store = createStore(reducer, composeWithDevTools());
+const middleware = [
+  ...getDefaultMiddleware({
+    serializableCheck: {
+      ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+    },
+  }),
+];
 
-export default store;
+const store = configureStore({
+  reducer: persistedReducer,
+  middleware,
+  devTools: process.env.NODE_ENV === "development",
+});
+
+const persistor = persistStore(store);
+
+// eslint-disable-next-line import/no-anonymous-default-export
+export default { store, persistor };
